@@ -1,4 +1,31 @@
 {
+    "doctrine/doctrine-bundle": {
+        "version": "2.12",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "2.10",
+            "ref": "c170ded8fc587d6bd670550c43dafcf093762245"
+        },
+        "files": [
+            "./config/packages/doctrine.yaml",
+            "./src/Entity/.gitignore",
+            "./src/Repository/.gitignore"
+        ]
+    },
+    "doctrine/doctrine-migrations-bundle": {
+        "version": "3.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "3.1",
+            "ref": "1d01ec03c6ecbd67c3375c5478c9a423ae5d6a33"
+        },
+        "files": [
+            "./config/packages/doctrine_migrations.yaml",
+            "./migrations/.gitignore"
+        ]
+    },
     "phpunit/phpunit": {
         "version": "11.2",
         "recipe": {
@@ -59,6 +86,15 @@
             "src/Kernel.php"
         ]
     },
+    "symfony/maker-bundle": {
+        "version": "1.50",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
+        }
+    },
     "symfony/phpunit-bridge": {
         "version": "7.1",
         "recipe": {
@@ -85,6 +121,18 @@
         "files": [
             "config/packages/routing.yaml",
             "config/routes.yaml"
+        ]
+    },
+    "symfony/validator": {
+        "version": "7.1",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "5.3",
+            "ref": "c32cfd98f714894c4f128bb99aa2530c1227603c"
+        },
+        "files": [
+            "./config/packages/validator.yaml"
         ]
     }
 }
