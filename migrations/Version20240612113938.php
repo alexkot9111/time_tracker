@@ -28,6 +28,7 @@ final class Version20240612113938 extends AbstractMigration
         $this->addSql('ALTER TABLE tracker ADD CONSTRAINT FK_AC632AAF979B1AD6 FOREIGN KEY (company_id) REFERENCES company (id)');
         $this->addSql('ALTER TABLE tracker_period ADD CONSTRAINT FK_F270D7BAFB5230B FOREIGN KEY (tracker_id) REFERENCES tracker (id)');
         $this->addSql('ALTER TABLE `user` ADD CONSTRAINT FK_8D93D649979B1AD6 FOREIGN KEY (company_id) REFERENCES company (id)');
+        $this->addSql("INSERT INTO company (id, email, name, created) VALUES (1, 'example1@example.com', 'Default Company', '2024-06-25 12:00:00')");
     }
 
     public function down(Schema $schema): void

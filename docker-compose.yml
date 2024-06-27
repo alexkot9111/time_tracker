@@ -9,6 +9,7 @@ services:
 
     mysql:
         image: 'mysql:8.0'
+        container_name: time_tracker_database
         working_dir: /application
         volumes:
             - '.:/application'
@@ -18,7 +19,7 @@ services:
             - MYSQL_USER=time_tracker
             - MYSQL_PASSWORD=time_tracker
         ports:
-            - '8890:3306'
+            - '3306:3306'
 
     webserver:
         image: 'nginx:alpine'

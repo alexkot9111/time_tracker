@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -18,27 +19,33 @@ class User
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['user'])]
     private ?Company $company = null;
 
     #[Assert\NotBlank, Assert\NotNull, Assert\Email(
         message: 'The email "{{ value }}" is not valid.'
     )]
     #[ORM\Column(length: 255)]
+    #[Groups(['user'])]
     private ?string $email = null;
 
     #[Assert\NotBlank, Assert\NotNull]
     #[ORM\Column(length: 255)]
+    #[Groups(['user'])]
     private ?string $first_name = null;
 
     #[Assert\NotBlank, Assert\NotNull]
     #[ORM\Column(length: 255)]
+    #[Groups(['user'])]
     private ?string $last_name = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['user'])]
     private ?\DateTimeInterface $created = null;
 
     /**

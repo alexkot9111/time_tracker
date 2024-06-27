@@ -36,6 +36,7 @@ class Company
     /**
      * @var Collection<int, User>
      */
+    #[Groups(['user_details'])]
     #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'company', orphanRemoval: true)]
     private Collection $users;
 
