@@ -85,9 +85,46 @@ class UserController extends Controller
     {
     }
 
-    #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'PUT'])]
+    public function edit(Request $request, User $user, EntityManagerInterface $entityManager, ValidatorInterface $validator, SerializerInterface $serializer): Response
     {
+        if ($request->isMethod('GET')) {
+            // Return the current user data as JSON
+            return new JsonResponse([
+                'id' => $user->getId(),
+                'first_name' => $user->getFirstName(),
+                'last_name' => $user->getLastName()
+            ]);
+        }
+
+        if ($request->isMethod('PUT')) {
+            // Get the request data
+            $data = json_decode($request->getContent(), true);
+
+            $user->setFirstName($data['first_name']);
+            $user->setLastName($data['last_name']);
+
+            // Validate the User entity
+            $errors = $validator->validate($user);
+
+            if (count($errors) > 0) {
+                // Transform Symfony's ConstraintViolationListInterface into an array of error messages
+                $errorMessages = [];
+                foreach ($errors as $error) {
+                    $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+                }
+
+                // Return JSON response with error messages and status code 400 (Bad Request)
+                return new JsonResponse(['errors' => $errorMessages], 400);
+            }
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $jsonPost = $serializer->serialize($user, 'json', ['groups' => ['user']]);
+
+            return new JsonResponse($jsonPost, 201, [], true);
+        }
     }
 
     #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]

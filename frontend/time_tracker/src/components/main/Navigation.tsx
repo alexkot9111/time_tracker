@@ -1,6 +1,7 @@
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
 
 function Navigation() {
     return (
@@ -8,8 +9,10 @@ function Navigation() {
             <Container>
                 <Navbar.Brand href="/">Time Tracker</Navbar.Brand>
                 <Nav className="me-auto">
-                    <Nav.Link href="users">Users List</Nav.Link>
-                    <Nav.Link href="userCreate">Create New User</Nav.Link>
+                    <NavDropdown title="Users" id="users-dropdown">
+                        <NavDropdown.Item href="/users">Users List</NavDropdown.Item>
+                        <NavDropdown.Item href="/users/create">Create New User</NavDropdown.Item>
+                    </NavDropdown>
                 </Nav>
             </Container>
         </Navbar>

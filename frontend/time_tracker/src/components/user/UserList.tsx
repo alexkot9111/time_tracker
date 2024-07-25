@@ -1,10 +1,10 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns';
-import Container from 'react-bootstrap/Container';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 function UserList() {
 
@@ -39,7 +39,17 @@ function UserList() {
                               <Col xs={4}>{user.first_name} {user.last_name}</Col>
                               <Col xs={4}>{user.email}</Col>
                               <Col>{format(new Date(user.created), 'yyyy-MM-dd HH:mm:ss')}</Col>
-                              <Col>Action</Col>
+                              <Col>
+                                  <Dropdown>
+                                      <Dropdown.Toggle variant="primary" id="dropdown-actions">
+                                          Actions
+                                      </Dropdown.Toggle>
+
+                                      <Dropdown.Menu>
+                                          <Dropdown.Item href={`/users/${user.id}/edit`}>Edit</Dropdown.Item>
+                                      </Dropdown.Menu>
+                                  </Dropdown>
+                              </Col>
                           </Row>
                       </ListGroup.Item>
                   ))
