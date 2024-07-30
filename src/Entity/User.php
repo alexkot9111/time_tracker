@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Config\UserRole;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -53,6 +54,14 @@ class User
      */
     #[ORM\OneToMany(targetEntity: Tracker::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $trackers;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user'])]
+    private ?string $password = null;
+
+    #[ORM\Column(type: 'string', enumType: UserRole::class)]
+    #[Groups(['user'])]
+    private ?string $role;
 
     public function __construct()
     {
@@ -150,6 +159,30 @@ class User
                 $tracker->setUserId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(?string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    public function getRole(): UserRole
+    {
+        return $this->role;
+    }
+
+    public function setRole(?string $role): static
+    {
+        $this->role = $role;
 
         return $this;
     }
