@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Config\UserRole;
 use App\Entity\User;
+use App\Service\UserService;
 use App\Repository\UserRepository;
 use App\Service\CurrentCompanyService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,11 +20,13 @@ class UserController extends Controller
 {
     private $currentCompanyService;
     private $userRepository;
+    private $userService;
 
-    public function __construct(CurrentCompanyService $currentCompanyService, UserRepository $userRepository)
+    public function __construct(CurrentCompanyService $currentCompanyService, UserRepository $userRepository, UserService $userService)
     {
         $this->currentCompanyService = $currentCompanyService;
         $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     #[Route('/', name: 'app_user_index', methods: ['GET'])]
@@ -35,50 +39,10 @@ class UserController extends Controller
     }
 
     #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, SerializerInterface $serializer): JsonResponse
+    public function new(Request $request): JsonResponse
     {
-        $currentCompany = $this->currentCompanyService->getCurrentCompany();
         $data = json_decode($request->getContent(), true);
-
-        if(empty($data['email'])) {
-            return new JsonResponse(['errors' => ['email' => 'Email can not be empty']], 400);
-        }
-
-        // Check if email already exist
-        $existingUser = $this->userRepository->findOneByEmail($data['email']);
-        if ($existingUser) {
-            return new JsonResponse(['errors' => ['email' => 'Email already exists']], 400);
-        }
-
-        // Set properties of the User entity
-        $user = new User();
-        $user->setCompanyId($currentCompany);
-        $user->setEmail($data['email']);
-        $user->setFirstName($data['first_name'] ?? '');
-        $user->setLastName($data['last_name'] ?? '');
-        $user->setCreated(new \DateTime());
-        $user->setRole('user');
-
-        // Validate the User entity
-        $errors = $validator->validate($user);
-
-        if (count($errors) > 0) {
-            // Transform Symfony's ConstraintViolationListInterface into an array of error messages
-            $errorMessages = [];
-            foreach ($errors as $error) {
-                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
-            }
-
-            // Return JSON response with error messages and status code 400 (Bad Request)
-            return new JsonResponse(['errors' => $errorMessages], 400);
-        }
-
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        $jsonPost = $serializer->serialize($user, 'json', ['groups' => ['user']]);
-
-        return new JsonResponse($jsonPost, 201, [], true);
+        return $this->userService->createUser($data, UserRole::ROLE_USER);
     }
 
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
@@ -87,7 +51,7 @@ class UserController extends Controller
     }
 
     #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'PUT'])]
-    public function edit(Request $request, User $user, EntityManagerInterface $entityManager, ValidatorInterface $validator, SerializerInterface $serializer): Response
+    public function edit(Request $request, User $user): JsonResponse
     {
         if ($request->isMethod('GET')) {
             // Return the current user data as JSON
@@ -101,30 +65,7 @@ class UserController extends Controller
         if ($request->isMethod('PUT')) {
             // Get the request data
             $data = json_decode($request->getContent(), true);
-
-            $user->setFirstName($data['first_name']);
-            $user->setLastName($data['last_name']);
-
-            // Validate the User entity
-            $errors = $validator->validate($user);
-
-            if (count($errors) > 0) {
-                // Transform Symfony's ConstraintViolationListInterface into an array of error messages
-                $errorMessages = [];
-                foreach ($errors as $error) {
-                    $errorMessages[$error->getPropertyPath()] = $error->getMessage();
-                }
-
-                // Return JSON response with error messages and status code 400 (Bad Request)
-                return new JsonResponse(['errors' => $errorMessages], 400);
-            }
-
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            $jsonPost = $serializer->serialize($user, 'json', ['groups' => ['user']]);
-
-            return new JsonResponse($jsonPost, 201, [], true);
+            return $this->userService->editUser($data, $user);
         }
     }
 

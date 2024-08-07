@@ -36,3 +36,11 @@ services:
         arguments:
             $companyRepository: '@App\Repository\CompanyRepository'
             $defaultCompanyId: '%env(DEFAULT_COMPANY_ID)%'
+
+    App\Service\UserService:
+        arguments:
+            $entityManager: '@doctrine.orm.entity_manager'
+            $userRepository: '@App\Repository\UserRepository'
+            $validator: '@validator'
+            $serializer: '@serializer'
+            $currentCompanyService: '@App\Service\CurrentCompanyService'

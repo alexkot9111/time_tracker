@@ -60,14 +60,15 @@ class User
     #[Groups(['user'])]
     private ?string $password = null;
 
-    #[Assert\NotBlank, Assert\NotNull]
+    #[Assert\NotNull]
     #[ORM\Column(type: 'string', enumType: UserRole::class)]
     #[Groups(['user'])]
-    private ?string $role;
+    private $role = UserRole::ROLE_USER;
 
     #[Assert\NotNull]
     #[ORM\Column(type: 'integer', enumType: UserStatus::class)]
-    private ?int $status = null;
+    #[Groups(['user'])]
+    private $status = UserStatus::STATUS_NOT_ACTIVE;
 
     /**
      * @var Collection<int, EmailHistory>
@@ -190,10 +191,10 @@ class User
 
     public function getRole(): UserRole
     {
-        return UserROle::from($this->role);
+        return $this->role;
     }
 
-    public function setRole(?string $role): static
+    public function setRole(UserRole $role): static
     {
         $this->role = $role;
 
@@ -202,10 +203,10 @@ class User
 
     public function getStatus(): UserStatus
     {
-        return UserStatus::from($this->status);
+        return $this->status;
     }
 
-    public function setStatus(int $status): static
+    public function setStatus(UserStatus $status): static
     {
         $this->status = $status;
 
