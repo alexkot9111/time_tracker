@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Config\UserRole;
+use App\Config\UserStatus;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -59,13 +60,25 @@ class User
     #[Groups(['user'])]
     private ?string $password = null;
 
+    #[Assert\NotBlank, Assert\NotNull]
     #[ORM\Column(type: 'string', enumType: UserRole::class)]
     #[Groups(['user'])]
     private ?string $role;
 
+    #[Assert\NotNull]
+    #[ORM\Column(type: 'integer', enumType: UserStatus::class)]
+    private ?int $status = null;
+
+    /**
+     * @var Collection<int, EmailHistory>
+     */
+    #[ORM\OneToMany(targetEntity: EmailHistory::class, mappedBy: 'recipient_id', orphanRemoval: true)]
+    private Collection $emailHistories;
+
     public function __construct()
     {
         $this->trackers = new ArrayCollection();
+        $this->emailHistories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -177,12 +190,54 @@ class User
 
     public function getRole(): UserRole
     {
-        return $this->role;
+        return UserROle::from($this->role);
     }
 
     public function setRole(?string $role): static
     {
         $this->role = $role;
+
+        return $this;
+    }
+
+    public function getStatus(): UserStatus
+    {
+        return UserStatus::from($this->status);
+    }
+
+    public function setStatus(int $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EmailHistory>
+     */
+    public function getEmailHistories(): Collection
+    {
+        return $this->emailHistories;
+    }
+
+    public function addEmailHistory(EmailHistory $emailHistory): static
+    {
+        if (!$this->emailHistories->contains($emailHistory)) {
+            $this->emailHistories->add($emailHistory);
+            $emailHistory->setRecipientId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEmailHistory(EmailHistory $emailHistory): static
+    {
+        if ($this->emailHistories->removeElement($emailHistory)) {
+            // set the owning side to null (unless already changed)
+            if ($emailHistory->getRecipientId() === $this) {
+                $emailHistory->setRecipientId(null);
+            }
+        }
 
         return $this;
     }

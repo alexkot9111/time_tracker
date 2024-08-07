@@ -57,6 +57,7 @@ class UserController extends Controller
         $user->setFirstName($data['first_name'] ?? '');
         $user->setLastName($data['last_name'] ?? '');
         $user->setCreated(new \DateTime());
+        $user->setRole('user');
 
         // Validate the User entity
         $errors = $validator->validate($user);
