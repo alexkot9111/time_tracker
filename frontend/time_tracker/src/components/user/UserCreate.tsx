@@ -104,7 +104,7 @@ function UserCreate() {
                                 isInvalid={!!errors.last_name}
                             />
                             <Form.Control.Feedback type="invalid">
-                                {errors.first_name}
+                                {errors.last_name}
                             </Form.Control.Feedback>
                         </Form.Group>
                     </Row>
