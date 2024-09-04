@@ -18,7 +18,7 @@ const UserEdit = () => {
 
     useEffect(() => {
         // Fetch user data on component mount
-        axios.get(`http://localhost:8888/api/user/${userId}/edit`)
+        axios.get(`http://localhost:8888/api/user/${userId}`)
             .then(response => {
                 setInputs(response.data);
             })
@@ -36,7 +36,7 @@ const UserEdit = () => {
     const handleFormSubmit = (event) => {
         event.preventDefault()
 
-        axios.put(`http://localhost:8888/api/user/${userId}/edit`, inputs)
+        axios.put(`http://localhost:8888/api/user/${userId}`, inputs)
             .then(response => {
                 setModalTitle('Success')
                 setModalText(`User "${inputs.first_name} ${inputs.last_name}" has been updated successfully.`)

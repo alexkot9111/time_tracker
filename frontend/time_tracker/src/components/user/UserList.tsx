@@ -13,8 +13,18 @@ function UserList() {
         getUsers()
     }, [])
 
-    function getUsers() {
+    const getUsers = () => {
         axios.get('http://localhost:8888/api/user')
+            .then(response => {
+                console.log(response.data);
+                setUsers(response.data);
+            })
+    }
+
+    const deleteUser = (event, userId) => {
+        event.preventDefault()
+
+        axios.delete(`http://localhost:8888/api/user/${userId}`)
             .then(response => {
                 console.log(response.data);
                 setUsers(response.data);
@@ -47,6 +57,9 @@ function UserList() {
 
                                       <Dropdown.Menu>
                                           <Dropdown.Item href={`/users/${user.id}/edit`}>Edit</Dropdown.Item>
+                                          <Dropdown.Item href="" onClick={(e) => {
+                                              deleteUser(e, user.id)
+                                          }}>Delete</Dropdown.Item>
                                       </Dropdown.Menu>
                                   </Dropdown>
                               </Col>

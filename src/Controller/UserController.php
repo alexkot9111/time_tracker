@@ -48,20 +48,16 @@ class UserController extends Controller
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
     public function show(User $user): Response
     {
+        return new JsonResponse([
+            'id' => $user->getId(),
+            'first_name' => $user->getFirstName(),
+            'last_name' => $user->getLastName()
+        ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'PUT'])]
+    #[Route('/{id}', name: 'app_user_edit', methods: ['PUT'])]
     public function edit(Request $request, User $user): JsonResponse
     {
-        if ($request->isMethod('GET')) {
-            // Return the current user data as JSON
-            return new JsonResponse([
-                'id' => $user->getId(),
-                'first_name' => $user->getFirstName(),
-                'last_name' => $user->getLastName()
-            ]);
-        }
-
         if ($request->isMethod('PUT')) {
             // Get the request data
             $data = json_decode($request->getContent(), true);
@@ -69,13 +65,14 @@ class UserController extends Controller
         }
     }
 
-    #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
+        // toDo Authorization and token check
+        //if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($user);
             $entityManager->flush();
-        }
+        //}
 
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
