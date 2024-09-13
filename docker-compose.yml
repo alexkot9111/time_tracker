@@ -14,10 +14,10 @@ services:
         volumes:
             - '.:/application'
         environment:
-            - MYSQL_ROOT_PASSWORD=root
-            - MYSQL_DATABASE=time_tracker
-            - MYSQL_USER=time_tracker
-            - MYSQL_PASSWORD=time_tracker
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
         ports:
             - '3306:3306'
 
@@ -36,3 +36,6 @@ services:
         volumes:
             - '.:/application'
             - './docker/php-fpm/php-ini-overrides.ini:/etc/php/8.3/fpm/conf.d/99-overrides.ini'
+        environment:
+              PHP_IDE_CONFIG: "serverName=Docker"
+              DATABASE_URL: "${DATABASE_URL}"

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="1" assertions="0" errors="1" failures="0" skipped="0" time="0.000000">
+    <testsuite name="App\Test\Controller\UserControllerTest" file="/opt/project/tests/Controller/UserControllerTest.php" tests="1" assertions="0" errors="1" failures="0" skipped="0" time="0.000000">
+      <testcase name="testIndex" file="/opt/project/tests/Controller/UserControllerTest.php" line="33" class="App\Test\Controller\UserControllerTest" classname="App.Test.Controller.UserControllerTest" assertions="0" time="0.000000">
+        <error type="LogicException">App\Test\Controller\UserControllerTest::testIndex
+LogicException: You must set the KERNEL_CLASS environment variable to the fully-qualified class name of your Kernel in phpunit.xml / phpunit.xml.dist or override the "App\Test\Controller\UserControllerTest::createKernel()" or "App\Test\Controller\UserControllerTest::getKernelClass()" method.
+
+/opt/project/vendor/symfony/framework-bundle/Test/KernelTestCase.php:55
+/opt/project/vendor/symfony/framework-bundle/Test/KernelTestCase.php:113
+/opt/project/vendor/symfony/framework-bundle/Test/KernelTestCase.php:72
+/opt/project/vendor/symfony/framework-bundle/Test/WebTestCase.php:44
+/opt/project/tests/Controller/UserControllerTest.php:22</error>
+      </testcase>
+    </testsuite>
+  </testsuite>
+</testsuites>

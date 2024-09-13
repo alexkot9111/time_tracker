@@ -7,6 +7,7 @@ use App\Config\UserStatus;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,21 +34,12 @@ class UserService
         $this->currentCompanyService = $currentCompanyService;
     }
 
-    public function createUser(array $data, UserRole $userRole): JsonResponse
+    public function getUserModel(array $data, UserRole $userRole): User
     {
+        // Get current company
         $currentCompany = $this->currentCompanyService->getCurrentCompany();
 
-        if (empty($data['email'])) {
-            return new JsonResponse(['errors' => ['email' => 'Email cannot be empty']], 400);
-        }
-
-        // Check if email already exists
-        $existingUser = $this->userRepository->findOneByEmail($data['email']);
-        if ($existingUser) {
-            return new JsonResponse(['errors' => ['email' => 'Email already exists']], 400);
-        }
-
-        // Set properties of the User entity
+        // Set values
         $user = new User();
         $user->setCompanyId($currentCompany);
         $user->setEmail($data['email']);
@@ -56,6 +48,25 @@ class UserService
         $user->setCreated(new \DateTime());
         $user->setRole($userRole);
         $user->setStatus(UserStatus::STATUS_NOT_ACTIVE);
+
+        // Return User Model
+        return $user;
+    }
+
+    public function createUser(array $data, UserRole $userRole): JsonResponse
+    {
+        if (empty($data['email'])) {
+            return new JsonResponse(['errors' => ['email' => 'Email cannot be empty']], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Check if email already exists
+        $existingUser = $this->userRepository->findOneByEmail($data['email']);
+        if ($existingUser) {
+            return new JsonResponse(['errors' => ['email' => 'Email already exists']], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Set properties of the User entity
+        $user = $this->getUserModel($data, $userRole);
 
         // Validate the User entity
         $errors = $this->validator->validate($user);
@@ -67,7 +78,7 @@ class UserService
             }
 
             // Return JSON response with error messages and status code 400 (Bad Request)
-            return new JsonResponse(['errors' => $errorMessages], 400);
+            return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
         }
 
         $this->entityManager->persist($user);
@@ -75,7 +86,7 @@ class UserService
 
         $jsonPost = $this->serializer->serialize($user, 'json', ['groups' => ['user']]);
 
-        return new JsonResponse($jsonPost, 201, [], true);
+        return new JsonResponse($jsonPost, Response::HTTP_CREATED, [], true);
     }
 
     public function editUser(array $data, User $user): JsonResponse
@@ -94,7 +105,7 @@ class UserService
             }
 
             // Return JSON response with error messages and status code 400 (Bad Request)
-            return new JsonResponse(['errors' => $errorMessages], 400);
+            return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
         }
 
         $this->entityManager->persist($user);
@@ -102,6 +113,6 @@ class UserService
 
         $jsonPost = $this->serializer->serialize($user, 'json', ['groups' => ['user']]);
 
-        return new JsonResponse($jsonPost, 201, [], true);
+        return new JsonResponse($jsonPost, Response::HTTP_OK, [], true);
     }
 }

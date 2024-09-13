@@ -2,135 +2,169 @@
 
 namespace App\Test\Controller;
 
+use App\Config\UserRole;
 use App\Entity\User;
+use App\Service\UserService;
+use App\Controller\UserController;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
+#[CoversClass(UserController::class)]
 class UserControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
     private EntityManagerInterface $manager;
-    private EntityRepository $repository;
-    private string $path = '/user/';
+    private $userService;
+    private string $path = '/api/user/';
+
+    private static $dummData = [
+        'email' => 'alex@alex.com',
+        'first_name' => 'Alex',
+        'last_name' => 'Test',
+    ];
+
+    private static $dummDataEdit = [
+        'first_name' => 'Alex2',
+        'last_name' => 'Test2',
+    ];
 
     protected function setUp(): void
     {
+        parent::setUp();
+
+        // Create the client for making requests
         $this->client = static::createClient();
+
+        // Get the entity manager
         $this->manager = static::getContainer()->get('doctrine')->getManager();
-        $this->repository = $this->manager->getRepository(User::class);
 
-        foreach ($this->repository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
+        // Get the UserService from the container
+        $this->userService = static::getContainer()->get(UserService::class);
+    }
 
-        $this->manager->flush();
+    public function tearDown(): void
+    {
+//        restore_error_handler();
+//        restore_exception_handler();
+        parent::tearDown();
     }
 
     public function testIndex(): void
     {
-        $crawler = $this->client->request('GET', $this->path);
+        // Send GET request to the index route
+        $this->client->request('GET', $this->path);
 
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('User index');
+        // Output the response content for debugging
+        $responseContent = $this->client->getResponse()->getContent();
+        $responseStatus = $this->client->getResponse()->getStatusCode();
 
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
+        // Assert that the response was successful
+        $this->assertEquals(Response::HTTP_OK, $responseStatus, 'Expected status code 200 for users list');
+
+        // Assert that the response is valid JSON
+        $this->assertJson($responseContent);
+
+        // Additionally, check if the returned JSON contains the expected data
+        $jsonData = json_decode($responseContent, true);
+
+        // Assert that the response data is an array (depending on the logic of your controller)
+        $this->assertIsArray($jsonData, 'Response data should be an array');
+        $this->assertNotEmpty($jsonData, 'Response data should not be empty');
     }
 
     public function testNew(): void
     {
-        $this->markTestIncomplete();
-        $this->client->request('GET', sprintf('%snew', $this->path));
+        // Send POST request to create a new user
+        $this->client->request('POST', sprintf('%snew', $this->path), [], [], [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_ACCEPT' => 'application/json',
+        ], json_encode(self::$dummData));
 
-        self::assertResponseStatusCodeSame(200);
+        // Output the response content for debugging
+        $responseContent = $this->client->getResponse()->getContent();
+        $responseStatus = $this->client->getResponse()->getStatusCode();
 
-        $this->client->submitForm('Save', [
-            'user[email]' => 'Testing',
-            'user[first_name]' => 'Testing',
-            'user[last_name]' => 'Testing',
-            'user[created]' => 'Testing',
-            'user[company]' => 'Testing',
-        ]);
-
-        self::assertResponseRedirects($this->path);
-
-        self::assertSame(1, $this->repository->count([]));
+        // Add assertions to verify the response
+        $this->assertEquals(Response::HTTP_CREATED, $responseStatus, 'Expected status code 201 for user creation');
+        $this->assertJson($responseContent, 'Response should be in JSON format');
     }
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new User();
-        $fixture->setEmail('My Title');
-        $fixture->setFirst_name('My Title');
-        $fixture->setLast_name('My Title');
-        $fixture->setCreated('My Title');
-        $fixture->setCompany('My Title');
+        // Get User Fixture
+        $fixture = $this->userService->getUserModel(self::$dummData, UserRole::ROLE_USER);
 
+        // Save User
         $this->manager->persist($fixture);
         $this->manager->flush();
 
+        // Send GET request
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
 
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('User');
+        // Output the response content for debugging
+        $responseContent = $this->client->getResponse()->getContent();
+        $responseStatus = $this->client->getResponse()->getStatusCode();
 
-        // Use assertions to check that the properties are properly displayed.
+        // Add assertions to verify the response
+        $this->assertEquals(Response::HTTP_OK, $responseStatus, 'Expected status code 200 for user show');
+        $this->assertJson($responseContent, 'Response should be in JSON format');
     }
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new User();
-        $fixture->setEmail('Value');
-        $fixture->setFirst_name('Value');
-        $fixture->setLast_name('Value');
-        $fixture->setCreated('Value');
-        $fixture->setCompany('Value');
+        // Get User Fixture
+        $fixture = $this->userService->getUserModel(self::$dummData, UserRole::ROLE_USER);
 
+        // Save User
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+        // Send PUT request
+        $this->client->request('PUT', sprintf('%s%s', $this->path, $fixture->getId()), [], [], [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_ACCEPT' => 'application/json',
+        ], json_encode(self::$dummDataEdit));
 
-        $this->client->submitForm('Update', [
-            'user[email]' => 'Something New',
-            'user[first_name]' => 'Something New',
-            'user[last_name]' => 'Something New',
-            'user[created]' => 'Something New',
-            'user[company]' => 'Something New',
-        ]);
+        // Output the response content for debugging
+        $responseContent = $this->client->getResponse()->getContent();
+        $responseStatus = $this->client->getResponse()->getStatusCode();
 
-        self::assertResponseRedirects('/user/');
+        // Add assertions to verify the response
+        $this->assertEquals(Response::HTTP_OK, $responseStatus, 'Expected status code 200 for user show');
+        $this->assertJson($responseContent, 'Response should be in JSON format');
 
-        $fixture = $this->repository->findAll();
-
-        self::assertSame('Something New', $fixture[0]->getEmail());
-        self::assertSame('Something New', $fixture[0]->getFirst_name());
-        self::assertSame('Something New', $fixture[0]->getLast_name());
-        self::assertSame('Something New', $fixture[0]->getCreated());
-        self::assertSame('Something New', $fixture[0]->getCompany());
+        // Add assertions to verify the data
+        $jsonData = json_decode($responseContent, true);
+        $this->assertEquals(self::$dummDataEdit['first_name'], $jsonData['first_name'], 'First names should be equal');
+        $this->assertEquals(self::$dummDataEdit['last_name'], $jsonData['last_name'], 'Last names should be equal');
     }
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new User();
-        $fixture->setEmail('Value');
-        $fixture->setFirst_name('Value');
-        $fixture->setLast_name('Value');
-        $fixture->setCreated('Value');
-        $fixture->setCompany('Value');
+        // Get User Fixture
+        $fixture = $this->userService->getUserModel(self::$dummData, UserRole::ROLE_USER);
 
+        // Save User
         $this->manager->persist($fixture);
         $this->manager->flush();
+        $userId = $fixture->getId();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-        $this->client->submitForm('Delete');
+        // Assert the user exists in the database
+        $this->assertNotNull($this->manager->getRepository(User::class)->find($userId));
 
-        self::assertResponseRedirects('/user/');
-        self::assertSame(0, $this->repository->count([]));
+        // Send DELETE request to the delete route
+        $this->client->request('DELETE', sprintf('%s%s', $this->path, $userId));
+
+        // Check that the response is a redirection (to 'app_user_index')
+        $this->assertResponseRedirects($this->path, Response::HTTP_SEE_OTHER);
+
+        // Clear entity manager to ensure fresh data is fetched
+        $this->manager->clear();
+
+        // Assert that the user no longer exists in the database
+        $this->assertNull($this->manager->getRepository(User::class)->find($userId), 'User should be deleted');
     }
 }

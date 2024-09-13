@@ -12,9 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
-
 #[Route('/user')]
 class UserController extends Controller
 {
@@ -30,15 +28,15 @@ class UserController extends Controller
     }
 
     #[Route('/', name: 'app_user_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
+    public function index(SerializerInterface $serializer): JsonResponse
     {
         $currentCompany = $this->currentCompanyService->getCurrentCompany();
-        $users = $userRepository->findByCompanyId($currentCompany->getId());
+        $users = $this->userRepository->findByCompanyId($currentCompany->getId());
         $jsonUsers = $serializer->serialize($users, 'json', ['groups' => ['user']]);
-        return new JsonResponse($jsonUsers, 201, [], true);
+        return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_user_new', methods: ['POST'])]
     public function new(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -52,17 +50,14 @@ class UserController extends Controller
             'id' => $user->getId(),
             'first_name' => $user->getFirstName(),
             'last_name' => $user->getLastName()
-        ]);
+        ], Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'app_user_edit', methods: ['PUT'])]
     public function edit(Request $request, User $user): JsonResponse
     {
-        if ($request->isMethod('PUT')) {
-            // Get the request data
-            $data = json_decode($request->getContent(), true);
-            return $this->userService->editUser($data, $user);
-        }
+        $data = json_decode($request->getContent(), true);
+        return $this->userService->editUser($data, $user);
     }
 
     #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]

@@ -20,7 +20,7 @@ final class Version20240730090011 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE user ADD password VARCHAR(255) DEFAULT NULL, ADD role VARCHAR(255) NOT NULL DEFAULT `user`');
+        $this->addSql("ALTER TABLE user ADD password VARCHAR(255) DEFAULT NULL, ADD role VARCHAR(255) NOT NULL DEFAULT 'user'");
     }
 
     public function down(Schema $schema): void
