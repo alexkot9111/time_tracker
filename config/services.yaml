@@ -44,3 +44,5 @@ services:
             $validator: '@validator'
             $serializer: '@serializer'
             $currentCompanyService: '@App\Service\CurrentCompanyService'
+
+    App\Service\AuthService:

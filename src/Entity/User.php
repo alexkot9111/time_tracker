@@ -11,12 +11,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User
+class User implements UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -182,9 +184,13 @@ class User
         return $this->password;
     }
 
-    public function setPassword(?string $password): static
+    public function setPassword(?string $password, UserPasswordHasher $passwordHasher): static
     {
-        $this->password = $password;
+        if (is_null($password)) {
+            $this->password = null;
+        } else {
+            $this->password = $passwordHasher->hashPassword($this, $password);
+        }
 
         return $this;
     }
@@ -199,6 +205,14 @@ class User
         $this->role = $role;
 
         return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return [
+            UserRole::ROLE_USER,
+            UserRole::ROLE_ADMIN,
+        ];
     }
 
     public function getStatus(): UserStatus
@@ -241,5 +255,15 @@ class User
         }
 
         return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
     }
 }
