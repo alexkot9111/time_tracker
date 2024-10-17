@@ -16,7 +16,7 @@ class AuthService
                 strtotime('+30 days'),  // Expires in 30 days
                 '/',
                 null,
-                true,  // Secure (only send over HTTPS)
+                false,  // Secure (only send over HTTPS) false for local
                 true,  // HttpOnly (not accessible via JavaScript)
                 false,
                 'Strict'

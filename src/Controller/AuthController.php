@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,12 +11,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use App\Service\AuthService;
 
 class AuthController extends Controller
 {
-    private RefreshTokenRepository $tokenRepository;
     private JWTTokenManagerInterface $JWTManager;
     private EntityManagerInterface $entityManager;
     private RefreshTokenManagerInterface $refreshTokenManager;
@@ -26,7 +23,6 @@ class AuthController extends Controller
     private AuthService $authService;
 
     public function __construct(
-        RefreshTokenRepository $tokenRepository,
         JWTTokenManagerInterface $JWTManager,
         EntityManagerInterface $em,
         RefreshTokenManagerInterface $refreshTokenManager,
@@ -35,7 +31,6 @@ class AuthController extends Controller
         AuthService $authService
     )
     {
-        $this->tokenRepository = $tokenRepository;
         $this->JWTManager = $JWTManager;
         $this->entityManager = $em;
         $this->refreshTokenManager = $refreshTokenManager;
@@ -60,7 +55,7 @@ class AuthController extends Controller
         $user = $this->userRepository->findOneBy(['email' => $email]);
 
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $password)) {
-            throw new AuthenticationException('Invalid credentials.');
+            return new JsonResponse(['message' => 'Invalid credentials.'], Response::HTTP_UNAUTHORIZED);
         }
 
         // Generate access token
@@ -68,7 +63,7 @@ class AuthController extends Controller
 
         // Create refresh token
         $refreshToken = $this->refreshTokenManager->create();
-        $refreshToken->setRefreshToken(uniqid());
+        $refreshToken->setRefreshToken(bin2hex(random_bytes(32)));
         $refreshToken->setUsername($user->getEmail());  // Store the email
         $refreshToken->setValid((new \DateTime())->modify('+30 days'));
         $this->entityManager->persist($refreshToken);
@@ -81,10 +76,9 @@ class AuthController extends Controller
 
         // Set HttpOnly cookie for refresh token
         return $this->authService->setRefreshTokenCookie($response, $refreshToken->getRefreshToken());
-
     }
 
-    #[Route('/token/refresh', name: 'api_refresh_token', methods: ['POST'])]
+    #[Route('/token/refresh', name: 'api_refresh_token', methods: ['GET'])]
     public function refresh(Request $request): JsonResponse
     {
         // Get the refresh token from the HttpOnly cookie
@@ -112,7 +106,7 @@ class AuthController extends Controller
         $newAccessToken = $this->JWTManager->create($user);
 
         // Refresh token and replace the old one
-        $newRefreshToken = uniqid();
+        $newRefreshToken = bin2hex(random_bytes(32)); // More secure token
         $refreshToken->setRefreshToken($newRefreshToken);
         $refreshToken->setValid((new \DateTime())->modify('+30 days'));
         $this->entityManager->flush();

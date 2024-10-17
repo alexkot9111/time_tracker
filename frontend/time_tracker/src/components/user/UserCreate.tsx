@@ -10,19 +10,19 @@ import { useNavigate } from 'react-router-dom'
 function UserCreate() {
 
     const [inputs, setInputs] = useState({ email: '', first_name: '', last_name: '' })
-    const [errors, setErrors] = useState([])
+    const [errors, setErrors] = useState({ email: '', first_name: '', last_name: '' })
     const [modalShow, setModalShow] = useState(false)
     const [modalTitle, setModalTitle] = useState('')
     const [modalText, setModalText] = useState('')
     const navigate = useNavigate()
 
-    const handleInputChange = (event) => {
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
         setInputs({ ...inputs, [name]: value });
         setErrors({ ...errors, [name]: '' });
     }
 
-    const handleFormSubmit = (event) => {
+    const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
         axios.post('http://localhost:8888/api/user/new', inputs)
@@ -46,10 +46,6 @@ function UserCreate() {
                 }
             })
     }
-
-    const handleOpenModal = () => {
-        setModalShow(true)
-    };
 
     const handleCloseModal = () => {
         setModalShow(false)
@@ -120,10 +116,10 @@ function UserCreate() {
         </div>
         <ModalBlock show={modalShow} handleClose={handleCloseModal} title={modalTitle}>
             {modalText}
-            {errors.length > 0 && (
+            {Array.isArray(errors) && errors.length > 0 && (
                 <div>
                     <ul>
-                        {errors.map((error, index) => (
+                        {errors.map((error: string, index: number) => (
                             <li key={index}>{error}</li>
                         ))}
                     </ul>

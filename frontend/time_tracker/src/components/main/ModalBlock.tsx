@@ -1,7 +1,14 @@
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
-const ModalBlock = ({ show, handleClose, title, children }) => {
+type ModalBlockProps = {
+    show: boolean;
+    handleClose: () => void;
+    title: string;
+    children: React.ReactNode;
+};
+
+const  ModalBlock: React.FC<ModalBlockProps> = ({ show, handleClose, title, children }) => {
     if (!show) {
         return null;
     }

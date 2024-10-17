@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom';
 const UserEdit = () => {
     const { userId } = useParams();
     const [inputs, setInputs] = useState({ first_name: '', last_name: '' })
-    const [errors, setErrors] = useState([])
+    const [errors, setErrors] = useState({ first_name: '', last_name: '' })
     const [modalShow, setModalShow] = useState(false)
     const [modalTitle, setModalTitle] = useState('')
     const [modalText, setModalText] = useState('')
@@ -23,17 +23,18 @@ const UserEdit = () => {
                 setInputs(response.data);
             })
             .catch(error => {
-                setErrors({ ...errors, [name]: '' });
+                console.error("Error fetching user data:", error);
+                // setErrors({ ...errors, [name]: '' });
             });
     }, [userId]);
 
-    const handleInputChange = (event) => {
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
         setInputs({ ...inputs, [name]: value });
         setErrors({ ...errors, [name]: '' });
     }
 
-    const handleFormSubmit = (event) => {
+    const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
         axios.put(`http://localhost:8888/api/user/${userId}`, inputs)
@@ -54,10 +55,6 @@ const UserEdit = () => {
                 }
             })
     }
-
-    const handleOpenModal = () => {
-        setModalShow(true)
-    };
 
     const handleCloseModal = () => {
         setModalShow(false)
@@ -112,10 +109,10 @@ const UserEdit = () => {
             </div>
             <ModalBlock show={modalShow} handleClose={handleCloseModal} title={modalTitle}>
                 {modalText}
-                {errors.length > 0 && (
+                {Array.isArray(errors) && errors.length > 0 && (
                     <div>
                         <ul>
-                            {errors.map((error, index) => (
+                            {errors.map((error: string, index: number) => (
                                 <li key={index}>{error}</li>
                             ))}
                         </ul>

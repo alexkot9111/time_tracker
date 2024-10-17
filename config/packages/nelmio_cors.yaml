@@ -1,5 +1,6 @@
 nelmio_cors:
     defaults:
+        allow_credentials: true
         origin_regex: true
         allow_origin: ['%env(CORS_ALLOW_ORIGIN)%']
         allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
@@ -8,7 +9,8 @@ nelmio_cors:
         max_age: 3600
     paths:
         '^/api/':
-            allow_origin: [ 'http://localhost:5173' ]
+            allow_credentials: true
+            allow_origin: [ 'http://localhost:5173', 'http://localhost:4173' ]
             allow_headers: [ '*' ]
             allow_methods: [ 'GET', 'OPTIONS', 'POST', 'PUT', 'DELETE' ]
             max_age: 3600

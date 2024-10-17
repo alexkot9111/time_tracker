@@ -21,7 +21,7 @@ function UserList() {
             })
     }
 
-    const deleteUser = (event, userId) => {
+    const deleteUser = (event: React.MouseEvent<HTMLElement, MouseEvent>, userId: number) => {
         event.preventDefault()
 
         axios.delete(`http://localhost:8888/api/user/${userId}`)
@@ -42,7 +42,7 @@ function UserList() {
                       <Col>Actions</Col>
                   </Row>
               </ListGroup.Item>
-              {users && users.length > 0 ? (
+              {Array.isArray(users) && users.length > 0 ? (
                   users.map((user, key) => (
                       <ListGroup.Item key={key}>
                           <Row>
