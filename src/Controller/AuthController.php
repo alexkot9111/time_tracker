@@ -78,6 +78,13 @@ class AuthController extends Controller
         return $this->authService->setRefreshTokenCookie($response, $refreshToken->getRefreshToken());
     }
 
+    #[Route('/logout', name: 'api_logout', methods: ['GET'])]
+    public function logout(Request $request): JsonResponse
+    {
+        $response = new JsonResponse(['message' => 'Logged out successfully.']);
+        return $this->authService->clearRefreshTokenCookie($response);
+    }
+
     #[Route('/token/refresh', name: 'api_refresh_token', methods: ['GET'])]
     public function refresh(Request $request): JsonResponse
     {

@@ -2,7 +2,7 @@ import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
-import axios from 'axios'
+import { instance } from "../auth/ApiConfig";
 import ModalBlock from '../main/ModalBlock'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -25,7 +25,7 @@ function UserCreate() {
     const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
-        axios.post('http://localhost:8888/api/user/new', inputs)
+        instance.post('http://localhost:8888/api/user/new', inputs)
             .then(response => {
                 setModalTitle('Success')
                 setModalText(`User "${inputs.first_name} ${inputs.last_name}" has been created successfully.`)

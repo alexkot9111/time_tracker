@@ -7,7 +7,7 @@ interface AuthState {
 
 const initialState: AuthState = {
     isAuth: false,
-    isAuthInProgress: false,
+    isAuthInProgress: true,
 };
 
 const authSlice = createSlice({

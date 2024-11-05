@@ -1,4 +1,4 @@
-import { instance } from "./ApiConfig.ts";
+import { instance } from "./ApiConfig";
 
 const AuthService = {
     login(email: string, password: string) {
@@ -10,7 +10,7 @@ const AuthService = {
     },
 
     logout() {
-        return instance.post("/api/logout");
+        return instance.get("/api/logout");
     }
 };
 

@@ -53,16 +53,22 @@ class UserService
         return $user;
     }
 
-    public function createUser(array $data, UserRole $userRole): JsonResponse
+    public function createUser(array $data, UserRole $userRole): array
     {
         if (empty($data['email'])) {
-            return new JsonResponse(['errors' => ['email' => 'Email cannot be empty']], Response::HTTP_BAD_REQUEST);
+            return [
+                'data' => ['errors' => ['email' => 'Email cannot be empty']],
+                'code' => Response::HTTP_BAD_REQUEST
+            ];
         }
 
         // Check if email already exists
         $existingUser = $this->userRepository->findOneByEmail($data['email']);
         if ($existingUser) {
-            return new JsonResponse(['errors' => ['email' => 'Email already exists']], Response::HTTP_BAD_REQUEST);
+            return [
+                'data' => ['errors' => ['email' => 'Email already exists']],
+                'code' => Response::HTTP_BAD_REQUEST
+            ];
         }
 
         // Set properties of the User entity
@@ -70,6 +76,7 @@ class UserService
 
         // Validate the User entity
         $errors = $this->validator->validate($user);
+
         if (count($errors) > 0) {
             // Transform Symfony's ConstraintViolationListInterface into an array of error messages
             $errorMessages = [];
@@ -77,19 +84,25 @@ class UserService
                 $errorMessages[$error->getPropertyPath()] = $error->getMessage();
             }
 
-            // Return JSON response with error messages and status code 400 (Bad Request)
-            return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
+            // Return array with error messages
+            return [
+                'data' => ['errors' => $errorMessages],
+                'code' => Response::HTTP_BAD_REQUEST
+            ];
         }
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $jsonPost = $this->serializer->serialize($user, 'json', ['groups' => ['user']]);
+        $normalizedUser = $this->serializer->normalize($user, null, ['groups' => ['user']]);
 
-        return new JsonResponse($jsonPost, Response::HTTP_CREATED, [], true);
+        return [
+            'data' => ['user' => $normalizedUser],
+            'code' => Response::HTTP_CREATED
+        ];
     }
 
-    public function editUser(array $data, User $user): JsonResponse
+    public function editUser(array $data, User $user): array
     {
         $user->setFirstName($data['first_name']);
         $user->setLastName($data['last_name']);
@@ -104,15 +117,21 @@ class UserService
                 $errorMessages[$error->getPropertyPath()] = $error->getMessage();
             }
 
-            // Return JSON response with error messages and status code 400 (Bad Request)
-            return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
+            // Return array with error messages
+            return [
+                'data' => ['errors' => $errorMessages],
+                'code' => Response::HTTP_BAD_REQUEST
+            ];
         }
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $jsonPost = $this->serializer->serialize($user, 'json', ['groups' => ['user']]);
+        $normalizedUser = $this->serializer->normalize($user, null, ['groups' => ['user']]);
 
-        return new JsonResponse($jsonPost, Response::HTTP_OK, [], true);
+        return [
+            'data' => ['user' => $normalizedUser],
+            'code' => Response::HTTP_CREATED
+        ];
     }
 }

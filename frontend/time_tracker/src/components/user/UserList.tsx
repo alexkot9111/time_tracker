@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { instance } from "../auth/ApiConfig";
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns';
 import ListGroup from 'react-bootstrap/ListGroup';
@@ -14,7 +14,7 @@ function UserList() {
     }, [])
 
     const getUsers = () => {
-        axios.get('http://localhost:8888/api/user')
+        instance.get('http://localhost:8888/api/user')
             .then(response => {
                 console.log(response.data);
                 setUsers(response.data);
@@ -24,7 +24,7 @@ function UserList() {
     const deleteUser = (event: React.MouseEvent<HTMLElement, MouseEvent>, userId: number) => {
         event.preventDefault()
 
-        axios.delete(`http://localhost:8888/api/user/${userId}`)
+        instance.delete(`http://localhost:8888/api/user/${userId}`)
             .then(response => {
                 console.log(response.data);
                 setUsers(response.data);

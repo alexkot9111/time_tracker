@@ -2,8 +2,18 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import AuthStore from "../auth/Store"
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 function Navigation(props: { isAuth: boolean; }) {
+    const dispatch = useDispatch();
+    const authStore = AuthStore(dispatch);
+    const navigate = useNavigate();
+    const handleLogout = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+        event.preventDefault();
+        authStore.logout(navigate);
+    };
     return (
         <Navbar expand="lg" className="bg-body-tertiary main-navbar">
             <Container>
@@ -17,7 +27,7 @@ function Navigation(props: { isAuth: boolean; }) {
                             </NavDropdown>
                         </Nav>
                         <Nav>
-                            <Nav.Link href="/logout">Logout</Nav.Link>
+                            <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
                         </Nav>
                     </>
                 :   <Nav>

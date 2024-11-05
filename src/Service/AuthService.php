@@ -25,4 +25,19 @@ class AuthService
 
         return $response;
     }
+
+    public function clearRefreshTokenCookie(JsonResponse $response): JsonResponse
+    {
+        $response->headers->clearCookie(
+            'refresh_token',
+            '/',
+            null,
+            false, // Secure (set to true if your site is HTTPS)
+            true,  // HttpOnly
+            'Strict'
+        );
+
+        return $response;
+    }
+
 }

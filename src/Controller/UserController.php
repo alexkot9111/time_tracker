@@ -19,20 +19,26 @@ class UserController extends Controller
     private $currentCompanyService;
     private $userRepository;
     private $userService;
+    private $serializer;
 
-    public function __construct(CurrentCompanyService $currentCompanyService, UserRepository $userRepository, UserService $userService)
-    {
+    public function __construct(
+        CurrentCompanyService $currentCompanyService,
+        UserRepository $userRepository,
+        UserService $userService,
+        SerializerInterface $serializer
+    ) {
         $this->currentCompanyService = $currentCompanyService;
         $this->userRepository = $userRepository;
         $this->userService = $userService;
+        $this->serializer = $serializer;
     }
 
     #[Route('/', name: 'app_user_index', methods: ['GET'])]
-    public function index(SerializerInterface $serializer): JsonResponse
+    public function index(): JsonResponse
     {
         $currentCompany = $this->currentCompanyService->getCurrentCompany();
         $users = $this->userRepository->findByCompanyId($currentCompany->getId());
-        $jsonUsers = $serializer->serialize($users, 'json', ['groups' => ['user']]);
+        $jsonUsers = $this->serializer->serialize($users, 'json', ['groups' => ['user']]);
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
@@ -40,11 +46,12 @@ class UserController extends Controller
     public function new(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        return $this->userService->createUser($data, UserRole::ROLE_USER);
+        $createUser = $this->userService->createUser($data, UserRole::ROLE_USER);
+        return new JsonResponse($createUser['data'], $createUser['code']);
     }
 
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
-    public function show(User $user): Response
+    public function show(User $user): JsonResponse
     {
         return new JsonResponse([
             'id' => $user->getId(),
@@ -57,7 +64,8 @@ class UserController extends Controller
     public function edit(Request $request, User $user): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        return $this->userService->editUser($data, $user);
+        $editUser = $this->userService->editUser($data, $user);
+        return new JsonResponse($editUser['data'], $editUser['code']);
     }
 
     #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]

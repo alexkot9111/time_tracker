@@ -2,7 +2,7 @@ import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
-import axios from 'axios'
+import { instance } from "../auth/ApiConfig";
 import ModalBlock from '../main/ModalBlock'
 import { useState, useEffect  } from 'react'
 import { useParams } from 'react-router-dom';
@@ -18,7 +18,7 @@ const UserEdit = () => {
 
     useEffect(() => {
         // Fetch user data on component mount
-        axios.get(`http://localhost:8888/api/user/${userId}`)
+        instance.get(`http://localhost:8888/api/user/${userId}`)
             .then(response => {
                 setInputs(response.data);
             })
@@ -37,7 +37,7 @@ const UserEdit = () => {
     const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
-        axios.put(`http://localhost:8888/api/user/${userId}`, inputs)
+        instance.put(`http://localhost:8888/api/user/${userId}`, inputs)
             .then(response => {
                 setModalTitle('Success')
                 setModalText(`User "${inputs.first_name} ${inputs.last_name}" has been updated successfully.`)
